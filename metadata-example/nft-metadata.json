@@ -1,0 +1,9 @@
+{
+    "attributes": [{
+        "type": "Attribute",
+        "value": "Attribute value"
+    }],
+    "description": "Image Description",
+    "image": "Image URL (e.g. IPFS like IPFS, Pinata)",
+    "name": "Image Name"
+}
