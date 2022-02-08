@@ -1,6 +1,7 @@
 from web3 import Web3
 from web3.eth import Contract
 from Connection import Connection
+from web3.exceptions import ContractLogicError, ValidationError, InvalidAddress
 
 class MyNFTWrapper:
     '''
@@ -30,6 +31,72 @@ class MyNFTWrapper:
         self.web3 = connection.getWeb3Connection()
         self.contract = connection.getContractConnection()
     
+    def getBalanceOfAOwner(self, address : str):
+        '''
+            Returns the amount of account tokens.
+
+            Parameters
+            ----------
+                - address (str): The account address of nft owner.
+
+            Returns
+            -------
+                - amount (int | None): Amount of tokens or None if occurs an error.
+        '''
+        try:
+            amount = self.contract.functions.balanceOf(address).call({'from': self.public_key})
+            return int(amount)
+        except (ValidationError, InvalidAddress) as c:
+            print("Invalid account address!")
+            print("Error description: {}".format(c))
+        except Exception as e:
+            print(e)
+        return None
+    
+    def getOwnerOfByTokenId(self, token_id : int):
+        '''
+            Returns the token owner.
+
+            Parameters
+            ----------
+                - token_id (int): The Non-Fungible Token ID.
+
+            Returns
+            -------
+                - owner (str | None): NFT owner or None if occurs an error.
+        '''
+        try:
+            owner = self.contract.functions.ownerOf(token_id).call({'from': self.public_key})
+            return str(owner)
+        except ContractLogicError as c:
+            print("Unexistent Token for this ID!")
+            print("Error description: {}".format(c))
+        except Exception as e:
+            print(e)
+        return None
+    
+    def getTokenURIById(self, token_id : int):
+        '''
+            Returns the token URI by ID.
+
+            Parameters
+            ----------
+                - token_id (int): The Non-Fungible Token ID.
+
+            Returns
+            -------
+                - tokenURI (str | None): NFT URL or None if occurs an error.
+        '''
+        try:
+            tokenURI = self.contract.functions.tokenURI(token_id).call({'from': self.public_key})
+            return str(tokenURI)
+        except ContractLogicError as c:
+            print("Unexistent Token for this ID!")
+            print("Error description: {}".format(c))
+        except Exception as e:
+            print(e)
+        return None 
+
     def getName(self):
         '''
             Returns the contract name.
@@ -81,12 +148,12 @@ class MyNFTWrapper:
 
             Parameters
             ----------
-                - tokenURI (str): The Non-Fungible Token URL, if the URL is not set yet
+                - tokenURI (str): The Non-Fungible Token URL.
 
             Returns
             -------
-                - data (None | tuple): None if occurs an error, or a tuple containing the transaction hash
-                and a dictionary with the recipient and URL of the NFT.
+                - data (None | tuple): None if occurs an error, or a tuple containing the token ID, 
+                the transaction hash and a dictionary with the recipient and URL of the NFT.
         '''
         try:
             # Getting the nounce of the account 
@@ -97,10 +164,13 @@ class MyNFTWrapper:
             signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
             # Retrieving the transaction hash
             tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            # Waiting transaction finish to get the token ID
+            token_id = self.web3.eth.wait_for_transaction_receipt(tx_hash)
+            token_id = int(token_id['logs'][1]['data'], 16)
             # Getting the transaction data
             transaction = self.web3.eth.get_transaction(tx_hash)
             data = dict(self.contract.decode_function_input(transaction.input)[1])
-            return (tx_hash.hex(), data)
+            return (token_id, tx_hash.hex(), data)
         except Exception as e:
             print(e)
             return None

@@ -10,6 +10,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/token/E
 contract MyNFT is ERC721URIStorage, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
+    event TokenId(uint256 token_id);
 
     constructor() public ERC721("MyNFT", "NFT") {}
 
@@ -20,6 +21,6 @@ contract MyNFT is ERC721URIStorage, Ownable {
         _mint(recipient, newItemId);
         _setTokenURI(newItemId, tokenURI);
 
-        return newItemId;
+        emit TokenId(newItemId);
     }
 }
