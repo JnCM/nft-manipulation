@@ -14,7 +14,7 @@ contract MyNFT is ERC721URIStorage, Ownable {
 
     constructor() public ERC721("MyNFT", "NFT") {}
 
-    function mintNFT(address recipient, string memory tokenURI) public onlyOwner returns (uint256){
+    function mintNFT(address recipient, string memory tokenURI) public onlyOwner{
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
