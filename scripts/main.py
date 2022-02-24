@@ -25,6 +25,8 @@ def menu():
     print("| 5 - Search a NFT by ID;           |")
     print("| 6 - View NFT owner by Token ID;   |")
     print("| 7 - Amount of NFTs of an account; |")
+    print("| 8 - Transfer a NFT;               |")
+    print("| 9 - Pay a NFT;                    |")
     print("| 0 - Exit.                         |")
     print("=====================================\n")
 
@@ -104,6 +106,23 @@ def main():
             print("=====================================")
             balance = nft_instance.getBalanceOfAOwner(address)
             print("Amount of tokens: {}".format(balance if balance is not None else "-"))
+        elif choice == 8:
+            address = input("Paste here the receiver account address: ")
+            try:
+                token_id = int(input("Type here your Non-Fungible Token ID: "))
+            except:
+                token_id = -1
+            print("=====================================")
+            if token_id > 0:
+                result = nft_instance.transferFrom(address, token_id)
+                print("Transfer result: {}".format(result if result is not None else "An error occurred."))
+            else:
+                print("Just enter valid IDs!")
+        elif choice == 9:
+            address = input("Paste here the receiver account address: ")
+            print("=====================================")
+            result = nft_instance.payNft(address, 0.02)
+            print("Transfer result: {}".format(result if result is not None else "An error occurred."))
         else:
             print("Just enter valid choices!")
 

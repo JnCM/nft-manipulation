@@ -174,3 +174,62 @@ class MyNFTWrapper:
         except Exception as e:
             print(e)
             return None
+
+    def transferFrom(self, to : str, tokenURI : str):
+        '''
+            Transfer a NFT to an account.
+
+            Parameters
+            ----------
+                - to (str): NFT receiver.
+                - tokenURI (str): The Non-Fungible Token URL.
+
+            Returns
+            -------
+                - data (None | str): None if occurs an error, or the transaction hash.
+        '''
+        try:
+            # Getting the nounce of the account 
+            nonce = self.web3.eth.get_transaction_count(self.public_key, 'latest')
+            # Creating the transaction
+            tx = self.contract.functions.transferFrom(self.public_key, to, tokenURI).buildTransaction({"nonce": nonce, "from": self.public_key})
+            # Signing the transaction with account private key
+            signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
+            # Retrieving the transaction hash
+            tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            return tx_hash.hex()
+        except Exception as e:
+            print(e)
+            return None
+    
+    def payNft(self, to : str, value : float):
+        '''
+            Pay a NFT.
+
+            Parameters
+            ----------
+                - to (str): NFT receiver.
+                - value (float): NFT value.
+            Returns
+            -------
+                - data (None | str): None if occurs an error, or the transaction hash.
+        '''
+        try:
+            # Getting the nounce of the account 
+            nonce = self.web3.eth.get_transaction_count(self.public_key, 'latest')
+            # Creating the transaction
+            tx = {
+                'nonce': nonce,
+                'to': to,
+                'value': self.web3.toWei(value, 'ether'),
+                'gas': 2000000,
+                'gasPrice': self.web3.toWei('50', 'gwei')
+            }
+            # Signing the transaction with account private key
+            signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
+            # Retrieving the transaction hash
+            tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            return tx_hash.hex()
+        except Exception as e:
+            print(e)
+            return None
